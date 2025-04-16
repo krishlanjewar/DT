@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Truth or Dare Game</title>
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --secondary-color: #8b5cf6;
+            --truth-color: #60a5fa;
+            --dare-color: #f87171;
+            --situation-color: #34d399;
+            --fate-color: #fbbf24;
+            --text-color: #ffffff;
+            --bg-color: #111827;
+            --card-bg: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            min-height: 100vh;
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .setup-screen, .game-screen, .challenge-screen, .voting-screen {
+            background-color: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: a6px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+            width: 100%;
+            display: none;
+        }
+
+        .setup-screen {
+            display: block;
+        }
+
+        .player-setup {
+            margin-bottom: 20px;
+        }
+
+        .player-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+            min-height: 50px;
+        }
+
+        .player-tag {
+            background-color: rgba(65, 222, 112, 0.2);
+            padding: 5px 10px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .player-tag button {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            margin-left: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .player-input-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+
+        button {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: var(--text-color);
+            border: none;
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .start-button {
+            background-color: var(--primary-color);
+            padding: 12px 24px;
+            font-size: 1.1rem;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .start-button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .spin-area {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .players-circle {
+            position: absolute;
+            width: 90%;
+            height: 90%;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .player-position {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            transform-origin: center 170px;
+            text-align: center;
+        }
+
+        .active-player {
+            background-color: var(--primary-color);
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .pen-container {
+            position: relative;
+            width: 100px;
+            height: 320px;
+            display: flex;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .pen {
+            position: absolute;
+            width: 20px;
+            height: 320px;
+            background: linear-gradient(to bottom, #9a4848 0%, #a74b4b 5%, #111111 5%, #ce76c3 95%, #7781d6 95%, #df8181 100%);
+            border-radius: 10px;
+            transform-origin: center center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(239, 4, 4, 0.3);
+            transition: transform 3s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+        }
+
+        .options-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .option-button {
+            flex: 1;
+            min-width: 120px;
+            max-width: 200px;
+            padding: 15px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .truth-button {
+            background-color: var(--truth-color);
+        }
+
+        .dare-button {
+            background-color: var(--dare-color);
+        }
+
+        .situation-button {
+            background-color: var(--situation-color);
+        }
+
+        .fate-button {
+            background-color: var(--fate-color);
+        }
+
+        .game-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .challenge-input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border: none;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+
+        .challenge-list {
+            margin: 20px 0;
+        }
+
+        .challenge-item {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .vote-button {
+            background-color: var(--primary-color);
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .status-message {
+            font-size: 1.2rem;
+            text-align: center;
+            margin: 20px 0;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+
+        .challenge-type {
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .truth-type {
+            background-color: var(--truth-color);
+        }
+
+        .dare-type {
+            background-color: var(--dare-color);
+        }
+
+        .situation-type {
+            background-color: var(--situation-color);
+        }
+
+        .fate-type {
+            background-color: var(--fate-color);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .shown {
+            display: block;
+        }
+
+        .winner-message {
+            font-size: 1.5rem;
+            text-align: center;
+            margin: 20px 0;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .spin-area {
+                height: 300px;
+            }
+            
+            .player-position {
+                transform-origin: center 130px;
+                padding: 5px 10px;
+                font-size: 0.9rem;
+            }
+            
+            .pen {
+                height: 260px;
+            }
+
+            .options-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .option-button {
+                max-width: none;
+                width: 80%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Truth or Dare Game</h1>
+
+        <!-- Player Setup Screen -->
+        <div class="setup-screen" id="setupScreen">
+            <div class="player-setup">
+                <h2>Add Players (2-16 players)</h2>
+                <div class="player-list" id="playerList"></div>
+                <div class="player-input-group">
+                    <input type="text" id="playerName" placeholder="Enter player name">
+                    <button id="addPlayerBtn">Add Player</button>
+                </div>
+                <p id="playerError" style="color: #f87171; margin-top: 5px;"></p>
+            </div>
+            <button class="start-button" id="startGameBtn">Start Game</button>
+        </div>
+
+        <!-- Game Screen -->
+        <div class="game-screen" id="gameScreen">
+            <div class="status-message" id="statusMessage">Spin the pen to start!</div>
+            
+            <div class="spin-area">
+                <div class="players-circle" id="playersCircle"></div>
+                <div class="pen-container">
+                    <div class="pen" id="pen"></div>
+                </div>
+            </div>
+
+            <div class="options-container" id="optionsContainer">
+                <button class="option-button truth-button" id="truthBtn">Truth</button>
+                <button class="option-button dare-button" id="dareBtn">Dare</button>
+                <button class="option-button situation-button" id="situationBtn">Situation</button>
+                <button class="option-button fate-button" id="fateBtn">Fate</button>
+            </div>
+
+            <div class="game-controls">
+                <button id="restartBtn">Restart Game</button>
+            </div>
+        </div>
+
+        <!-- Challenge Creation Screen -->
+        <div class="challenge-screen" id="challengeScreen">
+            <div class="challenge-type" id="challengeType">Truth Challenge</div>
+            <p>Submit a challenge for <span id="currentPlayerName">Player</span>:</p>
+            
+            <div id="challengeInputContainer">
+                <input type="text" class="challenge-input" id="challengeInput" placeholder="Enter your challenge">
+                <button id="submitChallengeBtn">Submit Challenge</button>
+            </div>
+            
+            <div class="challenge-list" id="challengeList"></div>
+            
+            <div class="game-controls">
+                <button id="finalizeChallengesBtn">Finalize Challenges</button>
+            </div>
+        </div>
+
+        <!-- Voting Screen -->
+        <div class="voting-screen" id="votingScreen">
+            <h2>Vote for the best challenge:</h2>
+            <div class="challenge-list" id="votingList"></div>
+            
+            <div class="winner-message hidden" id="winnerMessage"></div>
+            
+            <div class="game-controls">
+                <button id="completeTaskBtn" class="hidden">Mark Task as Completed</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game state variables
+        const gameState = {
+            players: [],
+            currentPlayerIndex: -1,
+            activePlayerIndex: -1,
+            challenges: [],
+            votes: {},
+            currentChallengeType: '',
+            isSpinning: false,
+            canSpin: true
+        };
+
+        // DOM Elements
+        const setupScreen = document.getElementById('setupScreen');
+        const gameScreen = document.getElementById('gameScreen');
+        const challengeScreen = document.getElementById('challengeScreen');
+        const votingScreen = document.getElementById('votingScreen');
+        const playerList = document.getElementById('playerList');
+        const playerNameInput = document.getElementById('playerName');
+        const addPlayerBtn = document.getElementById('addPlayerBtn');
+        const startGameBtn = document.getElementById('startGameBtn');
+        const playersCircle = document.getElementById('playersCircle');
+        const pen = document.getElementById('pen');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const truthBtn = document.getElementById('truthBtn');
+        const dareBtn = document.getElementById('dareBtn');
+        const situationBtn = document.getElementById('situationBtn');
+        const fateBtn = document.getElementById('fateBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const challengeType = document.getElementById('challengeType');
+        const currentPlayerName = document.getElementById('currentPlayerName');
+        const challengeInput = document.getElementById('challengeInput');
+        const submitChallengeBtn = document.getElementById('submitChallengeBtn');
+        const challengeList = document.getElementById('challengeList');
+        const finalizeChallengesBtn = document.getElementById('finalizeChallengesBtn');
+        const votingList = document.getElementById('votingList');
+        const winnerMessage = document.getElementById('winnerMessage');
+        const completeTaskBtn = document.getElementById('completeTaskBtn');
+        const statusMessage = document.getElementById('statusMessage');
+        const playerError = document.getElementById('playerError');
+        const challengeInputContainer = document.getElementById('challengeInputContainer');
+
+        // Initialize the game
+        function initGame() {
+            // Add event listeners
+            addPlayerBtn.addEventListener('click', addPlayer);
+            playerNameInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addPlayer();
+                }
+            });
+            startGameBtn.addEventListener('click', startGame);
+            pen.addEventListener('click', spinPen);
+            truthBtn.addEventListener('click', () => selectChallengeType('Truth'));
+            dareBtn.addEventListener('click', () => selectChallengeType('Dare'));
+            situationBtn.addEventListener('click', () => selectChallengeType('Situation'));
+            fateBtn.addEventListener('click', () => selectChallengeType('Fate'));
+            restartBtn.addEventListener('click', restartGame);
+            submitChallengeBtn.addEventListener('click', submitChallenge);
+            finalizeChallengesBtn.addEventListener('click', finalizeChallengers);
+            completeTaskBtn.addEventListener('click', completeTask);
+
+            // Hide option buttons initially
+            optionsContainer.classList.add('hidden');
+        }
+
+        // Add a player to the game
+        function addPlayer() {
+            const playerName = playerNameInput.value.trim();
+            if (playerName === '') {
+                playerError.textContent = 'Please enter a player name';
+                return;
+            }
+            
+            if (gameState.players.length >= 16) {
+                playerError.textContent = 'Maximum 16 players allowed';
+                return;
+            }
+            
+            if (gameState.players.includes(playerName)) {
+                playerError.textContent = 'Player name already exists';
+                return;
+            }
+            
+            gameState.players.push(playerName);
+            playerNameInput.value = '';
+            playerError.textContent = '';
+            
+            updatePlayerList();
+            updateStartButtonState();
+        }
+
+        // Update the player list display
+        function updatePlayerList() {
+            playerList.innerHTML = '';
+            gameState.players.forEach((player, index) => {
+                const playerTag = document.createElement('div');
+                playerTag.className = 'player-tag';
+                playerTag.innerHTML = `
+                    ${player}
+                    <button class="remove-player" data-index="${index}">×</button>
+                `;
+                playerList.appendChild(playerTag);
+            });
+            
+            // Add event listeners to remove buttons
+            const removeButtons = document.querySelectorAll('.remove-player');
+            removeButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    gameState.players.splice(index, 1);
+                    updatePlayerList();
+                    updateStartButtonState();
+                });
+            });
+        }
+
+        // Update the start button based on player count
+        function updateStartButtonState() {
+            if (gameState.players.length >= 2) {
+                startGameBtn.disabled = false;
+                startGameBtn.textContent = `Start Game with ${gameState.players.length} Players`;
+            } else {
+                startGameBtn.disabled = true;
+                startGameBtn.textContent = 'Add at least 2 players to start';
+            }
+        }
+
+        // Start the game
+        function startGame() {
+            if (gameState.players.length < 2) {
+                playerError.textContent = 'You need at least 2 players to start the game';
+                return;
+            }
+            
+            setupScreen.style.display = 'none';
+            gameScreen.style.display = 'block';
+            
+            // Create player positions in a circle
+            createPlayerPositions();
+            
+            // Set initial status message
+            statusMessage.textContent = 'Spin the pen to start!';
+            
+            gameState.canSpin = true;
+        }
+
+        // Create player positions in a circle
+        function createPlayerPositions() {
+            playersCircle.innerHTML = '';
+            const numPlayers = gameState.players.length;
+            const angleStep = 360 / numPlayers;
+            
+            gameState.players.forEach((player, index) => {
+                const playerEl = document.createElement('div');
+                playerEl.className = 'player-position';
+                playerEl.id = `player-${index}`;
+                playerEl.textContent = player;
+                
+                // Calculate position on the circle
+                const angle = angleStep * index;
+                playerEl.style.transform = `rotate(${angle}deg) translate(0, -170px) rotate(-${angle}deg)`;
+                
+                playersCircle.appendChild(playerEl);
+            });
+        }
+
+        // Spin the pen
+        function spinPen() {
+            if (!gameState.canSpin || gameState.isSpinning) return;
+            
+            gameState.isSpinning = true;
+            gameState.canSpin = false;
+            
+            // Hide options during spin
+            optionsContainer.classList.add('hidden');
+            
+            // Reset player classes
+            resetPlayerHighlights();
+            
+            // Create a random spin angle (multiple rotations + random position)
+            const spinAngle = 1080 + Math.floor(Math.random() * 360);
+            pen.style.transform = `rotate(${spinAngle}deg)`;
+            
+            // Calculate which player the pen points to
+            setTimeout(() => {
+                const normalizedAngle = spinAngle % 360;
+                const numPlayers = gameState.players.length;
+                const anglePerPlayer = 360 / numPlayers;
+                
+                // Calculate the player index (accounting for pen orientation)
+                let targetIndex = Math.floor(normalizedAngle / anglePerPlayer);
+                // Adjust index based on orientation (pen points in two directions)
+                if (normalizedAngle >= 180) {
+                    targetIndex = (targetIndex + Math.floor(numPlayers / 2)) % numPlayers;
+                }
+                
+                gameState.activePlayerIndex = targetIndex;
+                
+                // Highlight active player
+                highlightActivePlayer(targetIndex);
+                
+                // Show challenge options
+                setTimeout(() => {
+                    statusMessage.textContent = `${gameState.players[targetIndex]}, choose your challenge!`;
+                    optionsContainer.classList.remove('hidden');
+                    gameState.isSpinning = false;
+                }, 500);
+            }, 3000); // Wait for spin animation to finish
+        }
+
+        // Reset all player highlights
+        function resetPlayerHighlights() {
+            const playerElements = document.querySelectorAll('.player-position');
+            playerElements.forEach(el => el.classList.remove('active-player'));
+        }
+
+        // Highlight the active player
+        function highlightActivePlayer(index) {
+            resetPlayerHighlights();
+            const activePlayer = document.getElementById(`player-${index}`);
+            if (activePlayer) {
+                activePlayer.classList.add('active-player');
+            }
+        }
+
+        // Select challenge type (Truth, Dare, Situation, Fate)
+        function selectChallengeType(type) {
+            gameState.currentChallengeType = type;
+            
+            // Update UI
+            challengeType.textContent = `${type} Challenge`;
+            challengeType.className = `challenge-type ${type.toLowerCase()}-type`;
+            currentPlayerName.textContent = gameState.players[gameState.activePlayerIndex];
+            
+            // Reset challenges
+            gameState.challenges = [];
+            challengeList.innerHTML = '';
+            
+            // Change screens
+            gameScreen.style.display = 'none';
+            challengeScreen.style.display = 'block';
+            
+            // Setup challenge inputs for other players
+            setupChallengeInputs();
+        }
+
+        // Setup challenge inputs for other players
+        function setupChallengeInputs() {
+            gameState.currentPlayerIndex = 0;
+            
+            // Skip the active player
+            if (gameState.currentPlayerIndex === gameState.activePlayerIndex) {
+                gameState.currentPlayerIndex++;
+            }
+            
+            updateChallengeInputState();
+        }
+
+        // Update challenge input state
+        function updateChallengeInputState() {
+            if (gameState.currentPlayerIndex >= gameState.players.length) {
+                // All players have had a chance to submit
+                challengeInputContainer.classList.add('hidden');
+                if (gameState.challenges.length > 0) {
+                    finalizeChallengesBtn.disabled = false;
+                    finalizeChallengesBtn.textContent = 'Continue to Voting';
+                } else {
+                    finalizeChallengesBtn.disabled = true;
+                    finalizeChallengesBtn.textContent = 'No challenges submitted';
+                }
+                return;
+            }
+            
+            // Skip the active player
+            if (gameState.currentPlayerIndex === gameState.activePlayerIndex) {
+                gameState.currentPlayerIndex++;
+                if (gameState.currentPlayerIndex >= gameState.players.length) {
+                    updateChallengeInputState();
+                    return;
+                }
+            }
+            
+            challengeInputContainer.classList.remove('hidden');
+            challengeInput.placeholder = `${gameState.players[gameState.currentPlayerIndex]}, enter your challenge`;
+            challengeInput.value = '';
+            challengeInput.focus();
+        }
+
+        // Submit a challenge
+        function submitChallenge() {
+            const challenge = challengeInput.value.trim();
+            if (challenge === '') return;
+            
+            // Add challenge to the list
+            gameState.challenges.push({
+                text: challenge,
+                author: gameState.players[gameState.currentPlayerIndex],
+                votes: 0
+            });
+            
+            // Update UI
+            const challengeItem = document.createElement('div');
+            challengeItem.className = 'challenge-item';
+            challengeItem.innerHTML = `
+                <div>${challenge}</div>
+                <div>by ${gameState.players[gameState.currentPlayerIndex]}</div>
+            `;
+            challengeList.appendChild(challengeItem);
+            
+            // Move to next player
+            gameState.currentPlayerIndex++;
+            updateChallengeInputState();
+        }
+
+        // Finalize challenges and move to voting if needed
+        function finalizeChallengers() {
+            if (gameState.challenges.length === 0) return;
+            
+            if (gameState.challenges.length === 1) {
+                // Only one challenge, no need for voting
+                selectWinningChallenge(0);
+            } else {
+                // Multiple challenges, setup voting
+                setupVoting();
+            }
+        }
+
+        // Setup voting screen
+        function setupVoting() {
+            // Clear previous votes
+            gameState.votes = {};
+            votingList.innerHTML = '';
+            
+            // Create voting options
+            gameState.challenges.forEach((challenge, index) => {
+                const voteItem = document.createElement('div');
+                voteItem.className = 'challenge-item';
+                voteItem.innerHTML = `
+                    <div>${challenge.text}</div>
+                    <div>
+                        <span>by ${challenge.author}</span>
+                        <button class="vote-button" data-index="${index}">Vote</button>
+                    </div>
+                `;
+                votingList.appendChild(voteItem);
+            });
+            
+            // Add vote button listeners
+            const voteButtons = document.querySelectorAll('.vote-button');
+            voteButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    castVote(index);
+                });
+            });
+            
+            // Change screens
+            challengeScreen.style.display = 'none';
+            votingScreen.style.display = 'block';
+        }
+
+        // Cast a vote for a challenge
+        function castVote(challengeIndex) {
+            const playerIndex = gameState.currentPlayerIndex;
+            
+            // Skip the active player's vote
+            if (playerIndex === gameState.activePlayerIndex) {
+                gameState.currentPlayerIndex++;
+                castVote(challengeIndex);
+                return;
+            }
+            
+            // Record vote
+            gameState.votes[playerIndex] = challengeIndex;
+            gameState.challenges[challengeIndex].votes++;
+            
+            // Move to next player
+            gameState.currentPlayerIndex++;
+            
+            // Check if all players have voted
+            if (gameState.currentPlayerIndex >= gameState.players.length) {
+                // Find winning challenge
+                let maxVotes = -1;
+                let winningIndex = 0;
+                
+                gameState.challenges.forEach((challenge, index) => {
+                    if (challenge.votes > maxVotes) {
+                        maxVotes = challenge.votes;
+                        winningIndex = index;
+                    }
+                });
+                
+                selectWinningChallenge(winningIndex);
+            } else {
+                // Skip active player
+                if (gameState.currentPlayerIndex === gameState.activePlayerIndex) {
+                    gameState.currentPlayerIndex++;
+                }
+                
+                // Check again if we've reached the end
+                if (gameState.currentPlayerIndex >= gameState.players.length) {
+                    // Find winning challenge
+                    let maxVotes = -1;
+                    let winningIndex = 0;
+                    
+                    gameState.challenges.forEach((challenge, index) => {
+                        if (challenge.votes > maxVotes) {
+                            maxVotes = challenge.votes;
+                            winningIndex = index;
+                        }
+                    });
+                    
+                    selectWinningChallenge(winningIndex);
+                }
+            }
+        }
+
+        // Select the winning challenge
+        function selectWinningChallenge(index) {
+            const winningChallenge = gameState.challenges[index];
+            
+            // Hide voting options
+            votingList.innerHTML = '';
+            
+            // Show winner
+            winnerMessage.innerHTML = `
+                <div><strong>${gameState.players[gameState.activePlayerIndex]}</strong> must complete:</div>
+                <div class="challenge-type ${gameState.currentChallengeType.toLowerCase()}-type">
+                    ${gameState.currentChallengeType}
+                </div>
+                <div style="font-size: 1.3rem; margin: 15px 0;">
+                    "${winningChallenge.text}"
+                </div>
+                <div>Challenge by: ${winningChallenge.author}</div>
+            `;
+            winnerMessage.classList.remove('hidden');
+            
+            // Show complete button
+            completeTaskBtn.classList.remove('hidden');
+        }
+
+        // Mark task as completed
+        function completeTask() {
+            // Hide voting screen
+            votingScreen.style.display = 'none';
+            gameScreen.style.display = 'block';
+            
+            // Reset UI elements
+            winnerMessage.classList.add('hidden');
+            completeTaskBtn.classList.add('hidden');
+            optionsContainer.classList.add('hidden');
+            
+            // Update status
+            statusMessage.textContent = `${gameState.players[gameState.activePlayerIndex]} completed their challenge! They can now spin the pen.`;
+            
+            // Allow spinning again
+            gameState.canSpin = true;
+        }
+
+        // Restart the game
+        function restartGame() {
+            // Reset game state
+            gameState.currentPlayerIndex = -1;
+            gameState.activePlayerIndex = -1;
+            gameState.challenges = [];
+            gameState.votes = {};
+            gameState.currentChallengeType = '';
+            gameState.isSpinning = false;
+            gameState.canSpin = true;
+            
+            // Reset UI
+            pen.style.transform = 'rotate(0deg)';
+            resetPlayerHighlights();
+            optionsContainer.classList.add('hidden');
+            statusMessage.textContent = 'Spin the pen to start!';
+            
+            // Show setup screen
+            gameScreen.style.display = 'none';
+            challengeScreen.style.display = 'none';
+            votingScreen.style.display = 'none';
+            setupScreen.style.display = 'block';
+        }
+
+        // Initialize the game when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+</html>
